@@ -20,4 +20,10 @@ class Post extends Model
         'author',
         'hero'
     ];
+
+    protected $allowedSorts = [
+        'title',
+        'created_at',
+        'updated_at'
+    ];
 }

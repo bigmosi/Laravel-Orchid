@@ -14,6 +14,7 @@ use Orchid\Support\Facades\Layout;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Screen;
 use Orchid\Support\Facades\Alert;
+use Orchid\Screen\Fields\Cropper;
 
 class PostEditScreen extends Screen
 {
@@ -50,6 +51,9 @@ class PostEditScreen extends Screen
         if($this->exists){
             $this->name = 'Edit post';
         }
+
+        $post->load('attachment');
+
         return [
             'post' => $post
         ];
@@ -92,7 +96,13 @@ class PostEditScreen extends Screen
                 Input::make('post.title')
                     ->title('Title')
                     ->placeholder('Attractive but mysterious title')
-                    ->help('Specify a short descriptive title for this post.'),
+                    ->popover('Specify a short descriptive title for this post.'),
+
+                Cropper::make('post.hero')
+                    ->targetId()
+                    ->title('Large web banner image, generally in the front and center')
+                    ->width(1000)
+                    ->height(500),
 
                 TextArea::make('post.description')
                     ->title('Description')
@@ -107,6 +117,10 @@ class PostEditScreen extends Screen
                 Quill::make('post.body')
                     ->title('Main text'),
 
+
+                Upload::make('post.attachment')
+                    ->title('All files')
+
             ])
 
         ];
@@ -120,6 +134,10 @@ class PostEditScreen extends Screen
     public function createOrUpdate(Post $post, Request $request)
     {
         $post->fill($request->get('post'))->save();
+
+        $post->attachment()->syncWithoutDetaching(
+            $request->input('post.attachment', [])
+        );
 
         Alert::info('You have successfully created an post.');
 
